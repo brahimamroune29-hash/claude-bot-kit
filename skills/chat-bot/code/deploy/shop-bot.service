@@ -1,0 +1,26 @@
+# The bot as a service: starts on boot, restarts on a crash. Copy to /etc/systemd/system/ (steps in deploy/SETUP.md).
+[Unit]
+Description=Shop bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=bot
+Group=bot
+WorkingDirectory=/opt/shop-bot
+Environment=NODE_ENV=production
+# the keys live here only (chmod 600), never in git
+EnvironmentFile=/opt/shop-bot/.env
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning src/server.js
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+UMask=0077
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+# the code is read-only to the bot; it writes only its data/ (database, card, photos, backups)
+ReadWritePaths=/opt/shop-bot/data
+
+[Install]
+WantedBy=multi-user.target

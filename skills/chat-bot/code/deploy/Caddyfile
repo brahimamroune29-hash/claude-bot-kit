@@ -1,0 +1,4 @@
+# DOMAIN_HERE: the bot's address (its DNS record points to this server). Caddy gets the HTTPS certificate itself.
+DOMAIN_HERE {
+	reverse_proxy 127.0.0.1:3000
+}

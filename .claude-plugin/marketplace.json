@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "bot-kit",
+  "description": "بوت محادثة لواتساب وإنستغرام وماسنجر، وباني أتمتة n8n — مهارتان جاهزتان لكلود كود.",
+  "owner": {
+    "name": "Brahim Amro",
+    "url": "https://github.com/brahimamroune29-hash"
+  },
+  "plugins": [
+    {
+      "name": "bot-kit",
+      "description": "مهارتان: chat-bot (بوت محادثة بالكود، بلا اعتماديات) و automation (ورك فلو n8n من بلوكات مختبَرة).",
+      "source": "./",
+      "category": "productivity",
+      "keywords": ["chatbot", "whatsapp", "instagram", "messenger", "n8n", "automation", "arabic"]
+    }
+  ]
+}

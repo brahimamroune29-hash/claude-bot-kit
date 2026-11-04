@@ -1,0 +1,18 @@
+{
+  "name": "bot-kit",
+  "version": "1.0.0",
+  "description": "بوت محادثة لواتساب وإنستغرام وماسنجر، وباني أتمتة n8n بحرّاس مدمجة.",
+  "author": {
+    "name": "Brahim Amro",
+    "url": "https://github.com/brahimamroune29-hash"
+  },
+  "repository": "https://github.com/brahimamroune29-hash/claude-bot-kit",
+  "keywords": [
+    "chatbot",
+    "whatsapp",
+    "n8n",
+    "automation",
+    "arabic"
+  ],
+  "license": "MIT"
+}

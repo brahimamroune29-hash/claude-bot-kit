@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+*.db
+*.db-*
+node_modules/
+data/
+backups/
+media/
+workflow.json
+.DS_Store

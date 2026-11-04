@@ -1,0 +1,8 @@
+.env
+*.db
+*.db-*
+backups/
+node_modules/
+*.local.*
+media/
+data/

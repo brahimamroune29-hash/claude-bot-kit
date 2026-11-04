@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>جرّب البوت</title>
+<style>
+  :root { --bg: #efeae2; --me: #d9fdd3; --them: #fff; --head: #075e54; --ink: #111b21; --muted: #667781; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; background: #d1d7db; color: var(--ink); }
+  .phone { max-width: 480px; height: 100vh; margin: 0 auto; display: flex; flex-direction: column; background: var(--bg); }
+  header { background: var(--head); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+  header b { flex: 1; } header small { display: block; opacity: .8; font-size: 13px; }
+  header button, header a { background: transparent; border: 1px solid #fff7; color: #fff; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; text-decoration: none; }
+  #log { flex: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .b { max-width: 80%; padding: 6px 10px 4px; border-radius: 10px; white-space: pre-wrap; box-shadow: 0 1px .5px #0002; }
+  .b small { display: block; text-align: left; font-size: 11px; color: var(--muted); }
+  .student { align-self: flex-start; background: var(--me); }
+  .bot, .human { align-self: flex-end; background: var(--them); }
+  .human { border-inline-start: 3px solid #25d366; }
+  .failed { opacity: .5; }
+  .b img { display: block; max-width: 100%; border-radius: 8px; margin-bottom: 4px; }
+  .note { align-self: center; background: #fff3c4; font-size: 13px; padding: 4px 10px; border-radius: 8px; }
+  form { display: flex; gap: 8px; padding: 8px; background: #f0f2f5; }
+  textarea { flex: 1; resize: none; border: 0; border-radius: 20px; padding: 10px 14px; font: inherit; height: 44px; }
+  #mic.on { background: #d93025; }
+  form button { border: 0; border-radius: 50%; width: 44px; height: 44px; background: #00a884; color: #fff; font-size: 18px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <header>
+    <b>البوت<small id="status">متصل</small></b>
+    <a href="/" target="_blank">اللوحة</a>
+    <button id="reset" type="button">محادثة جديدة</button>
+  </header>
+  <div id="log"></div>
+  <form id="f">
+    <textarea id="t" placeholder="اكتب كأنك زبون… الإدخال يرسل" autofocus></textarea>
+    <button type="button" id="pic" aria-label="ابعث صورة">📎</button>
+    <input type="file" id="picfile" accept="image/jpeg,image/png" hidden>
+    <button type="button" id="mic" aria-label="سجّل فويس">🎤</button>
+    <button aria-label="إرسال">➤</button>
+  </form>
+</div>
+<script>
+const newPhone = () => '213555700' + String(Math.floor(Math.random() * 1e3)).padStart(3, '0');
+let phone = sessionStorage.getItem('tryPhone') || newPhone();
+sessionStorage.setItem('tryPhone', phone);
+const $ = (id) => document.getElementById(id);
+const time = (ms) => new Date(ms).toLocaleTimeString('ar-DZ-u-nu-latn', { hour: '2-digit', minute: '2-digit' });
+const who = { bot: 'البوت', human: 'إنسان من الفريق' };
+let last = '';
+
+async function poll() {
+  try {
+    const r = await fetch('/try/messages?phone=' + phone).then((x) => x.json());
+    const key = JSON.stringify(r);
+    if (key !== last) {
+      last = key;
+      const log = $('log');
+      log.replaceChildren(...r.messages.map((m) => {
+        const d = document.createElement('div');
+        d.className = 'b ' + m.role + (m.status === 'failed' ? ' failed' : '');
+        if (m.media) { // a product photo the bot sent (caption below it)
+          const img = document.createElement('img');
+          img.src = '/media/' + m.media; img.alt = '';
+          d.append(img);
+        }
+        d.append(m.text);
+        const s = document.createElement('small');
+        s.textContent = (who[m.role] ? who[m.role] + ' · ' : '') + time(m.at);
+        d.append(s);
+        return d;
+      }));
+      if (r.handedOff) {
+        const n = document.createElement('div');
+        n.className = 'note';
+        n.textContent = 'تحوّلت المحادثة لإنسان — رد عليها من اللوحة';
+        log.append(n);
+      }
+      log.scrollTop = log.scrollHeight;
+    }
+    $('status').textContent = r.typing ? 'يكتب…' : 'متصل';
+  } catch { $('status').textContent = 'البوت متوقف؟'; }
+}
+
+$('f').onsubmit = async (e) => {
+  e.preventDefault();
+  const text = $('t').value.trim();
+  if (!text) return;
+  $('t').value = '';
+  await fetch('/try/send?phone=' + phone, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) });
+  poll();
+};
+$('t').onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('f').requestSubmit(); } };
+// voice note: press to record, press again to send (the bot transcribes it like a WhatsApp voice note)
+let rec = null;
+$('mic').onclick = async () => {
+  if (rec) return rec.stop();
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { return alert('اسمح للمتصفح باستعمال الميكروفون'); }
+  const parts = [];
+  rec = new MediaRecorder(stream);
+  rec.ondataavailable = (e) => parts.push(e.data);
+  rec.onstop = async () => {
+    stream.getTracks().forEach((t) => t.stop());
+    const blob = new Blob(parts, { type: rec.mimeType });
+    rec = null; $('mic').classList.remove('on');
+    await fetch('/try/voice?phone=' + phone, { method: 'POST', headers: { 'content-type': blob.type || 'audio/webm' }, body: blob });
+    poll();
+  };
+  rec.start(); $('mic').classList.add('on');
+};
+// a photo, as a customer would send one on WhatsApp
+$('pic').onclick = () => $('picfile').click();
+$('picfile').onchange = async () => {
+  const f = $('picfile').files[0];
+  if (!f) return;
+  await fetch('/try/image?phone=' + phone, { method: 'POST', headers: { 'content-type': f.type || 'image/jpeg' }, body: f });
+  $('picfile').value = '';
+  poll();
+};
+$('reset').onclick = () => { phone = newPhone(); sessionStorage.setItem('tryPhone', phone); last = ''; poll(); };
+setInterval(poll, 1000);
+poll();
+</script>
+</body>
+</html>

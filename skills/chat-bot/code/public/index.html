@@ -1,0 +1,777 @@
+<!doctype html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>لوحة المتجر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* white cards on a pale canvas, deep green, one filled card, thick green bars */
+:root{
+  --green:#0b6b3c;--green-h:#0a6036;--green-2:#16a160;--green-3:#7fcca2;--green-50:#e8f4ed;--green-100:#d3eadc;
+  --ink:#121a16;--ink-2:#1f2a24;--muted:#66706a;--line:#e6e9e7;--track:#eff2f0;--canvas:#f4f6f5;--surface:#fff;
+  --red:#c8412e;--red-50:#fcebe8;--amber:#9a5b00;--amber-50:#fcf1dc;--blue:#2b54b5;--blue-50:#e9eefb;
+  --shadow:0 1px 2px rgb(18 26 22/.04),0 8px 24px -16px rgb(18 26 22/.14);
+  --r:18px
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-tap-highlight-color:transparent;text-size-adjust:100%;scrollbar-color:#c9cfcb transparent}
+body{margin:0;background:var(--canvas);color:var(--ink);font:400 15px/1.6 "IBM Plex Sans Arabic",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+::selection{background:var(--green-100);color:var(--ink)}
+button,input,textarea{font:inherit;color:inherit}
+input,textarea{caret-color:var(--green)}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+h1,h2,p{margin:0}
+a{color:inherit}
+.num{font-variant-numeric:tabular-nums}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.flip{transform:scaleX(-1)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:500;font-size:.92rem;text-decoration:none;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn:hover{background:var(--canvas)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.pri{background:var(--green);border-color:var(--green);color:#fff;font-weight:600}
+.btn.pri:hover{background:var(--green-h)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--canvas);color:var(--ink)}
+.btn.sm{min-height:38px;padding:0 12px;font-size:.86rem}
+.btn.icon{width:44px;padding:0}
+.btn svg.i{width:18px;height:18px}
+
+/* pills: a status lives here */
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:.78rem;font-weight:600;white-space:nowrap;line-height:1.5}
+.pill.ok{background:var(--green-50);color:var(--green)}
+.pill.warn{background:var(--amber-50);color:var(--amber)}
+.pill.info{background:var(--blue-50);color:var(--blue)}
+.pill.fail{background:var(--red-50);color:var(--red)}
+.pill.plain{background:var(--canvas);color:var(--muted)}
+.pill svg.i{width:14px;height:14px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;min-width:0}
+@media (min-width:1024px){.card{padding:24px}}
+.card h2{font-size:1.12rem;font-weight:700;line-height:1.4}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.head .aside{color:var(--muted);font-size:.86rem;white-space:nowrap}
+.head .aside b{color:var(--ink);font-size:1.05rem;font-weight:700}
+.hint{color:var(--muted);font-size:.88rem;line-height:1.7;margin:-6px 0 18px;max-width:72ch}
+.more{display:inline-flex;align-items:center;gap:6px;color:var(--green);font-weight:600;font-size:.88rem;text-decoration:none;white-space:nowrap}
+.more:hover{text-decoration:underline;text-underline-offset:4px}
+.more svg.i{width:16px;height:16px}
+.cnt{display:inline-grid;place-items:center;min-width:28px;height:24px;padding:0 8px;border-radius:8px;background:var(--canvas);color:var(--muted);font-size:.8rem;font-weight:600;margin-inline-start:8px;vertical-align:2px}
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;color:var(--muted);padding:28px 12px;font-size:.92rem;line-height:1.7}
+.empty .ic{width:52px;height:52px;border-radius:50%;background:var(--canvas);color:var(--green);display:grid;place-items:center}
+.av{width:42px;height:42px;border-radius:50%;background:var(--green-50);color:var(--green);display:grid;place-items:center;font-weight:700;flex:none}
+
+/* login */
+#login{min-height:100dvh;display:grid;place-items:center;padding:20px}
+#login form{width:min(100%,400px);display:flex;flex-direction:column;gap:14px;padding:28px}
+#login .lhead{display:flex;align-items:center;gap:12px}
+#login h1{font-size:1.5rem;font-weight:700}
+#login p{color:var(--muted);font-size:.92rem;margin-top:-4px}
+label{font-size:.88rem;font-weight:600}
+.field{width:100%;height:50px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 16px;font-size:1rem;transition:border-color .15s,box-shadow .15s}
+.field:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 4px var(--green-50)}
+#login .btn.pri{min-height:50px;margin-top:4px}
+#login .err{color:var(--red);background:var(--red-50);border-radius:10px;padding:8px 12px;margin:0;font-size:.88rem}
+
+/* shell: white sidebar on the PC, white tab bar on the phone */
+.mark{width:40px;height:40px;border-radius:11px;background:var(--green);color:#fff;display:grid;place-items:center;flex:none}
+.brand-row{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-row b{font-size:1.15rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shell{display:grid;grid-template-columns:minmax(0,1fr);min-height:100dvh}
+.side{position:fixed;inset:auto 0 0 0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.side .brand-row,.side .out{display:none}
+.nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.nav a{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;border-radius:14px;color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:500;transition:background .2s,color .2s}
+.nav a:hover{color:var(--ink)}
+.nav a.on{background:var(--green-50);color:var(--green);font-weight:600}
+.nav .badge{position:absolute;top:3px;inset-inline-start:calc(50% + 5px);min-width:19px;height:19px;padding:0 5px;border-radius:7px;background:var(--red);color:#fff;font-size:.7rem;font-weight:600;display:grid;place-items:center;line-height:1}
+.main{min-width:0;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.mhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+@media (min-width:1024px){
+  .shell{grid-template-columns:260px minmax(0,1fr);background:linear-gradient(to left,var(--surface) 260px,var(--line) 260px 261px,transparent 261px)}
+  .side{position:sticky;inset:auto;top:0;height:100dvh;border-top:0;background:transparent;padding:26px 18px;display:flex;flex-direction:column;gap:30px}
+  .side .brand-row{display:flex;padding:0 8px}
+  .nav{grid-template-columns:1fr;gap:4px}
+  .nav a{flex-direction:row;gap:12px;padding:11px 14px;border-radius:12px;font-size:.98rem}
+  .nav a svg.i{width:21px;height:21px}
+  .nav .badge{position:static;margin-inline-start:auto;height:22px;min-width:22px;border-radius:8px;font-size:.76rem}
+  .side .out{display:flex;margin-top:auto}
+  .mhead{display:none}
+  .main{padding-bottom:0}
+}
+
+/* top bar: the page title, the date, the period on the home page */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:18px 16px 4px}
+.top h1{font-size:1.5rem;font-weight:700;line-height:1.3}
+.top .date{color:var(--muted);font-size:.88rem}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:0 14px;min-height:38px;font-size:.88rem;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
+.seg button.on{background:var(--green-50);color:var(--green);font-weight:600}
+.seg{max-width:100%;overflow-x:auto}
+.seg button{white-space:nowrap}
+.seg .cnt{height:20px;min-width:22px;padding:0 6px;font-size:.72rem;margin-inline-start:6px;vertical-align:1px}
+.seg button.on .cnt{background:var(--surface);color:var(--green)}
+@media (min-width:1024px){.top{padding:22px 32px;background:var(--surface);border-bottom:1px solid var(--line)}.top h1{font-size:1.65rem}}
+
+#banner{position:sticky;top:12px;z-index:15;margin:12px 16px 0;background:var(--red-50);color:var(--red);border-radius:12px;padding:12px 16px;font-size:.92rem;font-weight:500;box-shadow:0 12px 30px -16px rgb(18 26 22/.35);cursor:pointer}
+@media (min-width:1024px){#banner{margin:20px 32px 0;max-width:1376px}}
+
+.page{padding:12px 16px 20px}
+@media (min-width:1024px){.page{padding:28px 32px 40px;max-width:1440px}}
+
+/* home */
+.home{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1024px){.home{gap:22px;grid-template-columns:repeat(12,minmax(0,1fr))}.kpis{grid-column:1/-1}.chart{grid-column:span 8}.recent{grid-column:span 4}.status{grid-column:1/-1}}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:1024px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}}
+.kpi{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:inherit;padding:16px;transition:border-color .2s,background .2s}
+.kpi .ic{width:46px;height:46px;border-radius:50%;background:var(--canvas);color:var(--green);display:grid;place-items:center;margin-bottom:12px}
+.kpi .lbl{color:var(--muted);font-size:.84rem;font-weight:500;line-height:1.45}
+.kpi .val{font-size:1.65rem;font-weight:700;line-height:1.25;letter-spacing:-.01em;white-space:nowrap}
+.kpi .val small{font-size:.95rem;font-weight:600;margin-inline-start:4px}
+.kpi .sub{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted);margin-top:6px;line-height:1.5}
+.kpi .sub b{color:var(--ink);font-weight:600}
+.kpi .sub svg.i{width:15px;height:15px}
+.kpi .go{color:var(--green);font-weight:600}
+a.kpi:hover{border-color:#d3d8d5}
+.kpi.now{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 14px 30px -18px rgb(11 107 60/.7)}
+a.kpi.now:hover{background:var(--green-h);border-color:var(--green-h)}
+.kpi.now .ic{background:#fff;color:var(--green)}
+.kpi.now .lbl,.kpi.now .sub{color:rgb(255 255 255/.86)}
+.kpi.now .sub b,.kpi.now .go{color:#fff}
+@media (min-width:1024px){.kpi{padding:24px}.kpi .ic{width:56px;height:56px;margin-bottom:18px}.kpi .ic svg.i{width:24px;height:24px}.kpi .lbl{font-size:.95rem}.kpi .val{font-size:2.1rem}.kpi .sub{font-size:.88rem}}
+
+/* bars: grey track, green fill, today in the bright green with its count */
+.chart{display:flex;flex-direction:column}
+.plot{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;height:230px;margin-top:8px}
+@media (min-width:1024px){.plot{height:300px;flex:1}}
+.ticks{position:relative;margin-bottom:34px;min-width:1.2em;font-size:.76rem;color:var(--muted)}
+.ticks span{position:absolute;inset-inline-start:0;transform:translateY(-50%);line-height:1}
+.bars{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;background:repeating-linear-gradient(to bottom,var(--line) 0 1px,transparent 1px 25%) 0 0/100% calc(100% - 34px) no-repeat}
+.bar{display:flex;flex-direction:column;align-items:center;outline:none;cursor:default}
+.bar .col{position:relative;flex:1;width:min(100%,46px);border-radius:10px;background:var(--track);display:flex;align-items:flex-end}
+.bar i{display:block;width:100%;height:var(--h);border-radius:10px;background:var(--green);transform-origin:bottom;animation:grow .9s cubic-bezier(.16,1,.3,1) both}
+.bar.today i{background:var(--green-2)}
+.bar span{height:34px;display:flex;align-items:flex-end;font-size:.8rem;color:var(--muted);white-space:nowrap}
+.bar.today span{color:var(--ink);font-weight:600}
+.bar em{position:absolute;bottom:calc(var(--h) + 10px);left:50%;translate:-50% 0;font-style:normal;background:var(--ink-2);color:#fff;font-size:.78rem;font-weight:600;border-radius:9px;padding:4px 10px;white-space:nowrap;opacity:0;transition:opacity .15s;pointer-events:none;z-index:1}
+.bar.today em,.bar:hover em,.bar:focus-visible em{opacity:1}
+.bars:hover .bar.today:not(:hover) em{opacity:0}
+.bar:focus-visible .col{outline:2px solid var(--green);outline-offset:3px}
+@keyframes grow{from{transform:scaleY(.04)}}
+
+/* the latest orders, a timeline on the side */
+.tl{list-style:none;margin:0;padding:0;position:relative;display:flex;flex-direction:column;gap:10px;padding-inline-end:22px}
+.tl::before{content:"";position:absolute;inset-inline-end:5px;top:26px;bottom:26px;width:2px;background:var(--green-100);border-radius:2px}
+.tl li{position:relative;background:var(--canvas);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:baseline}
+.tl li::after{content:"";position:absolute;inset-inline-end:-22px;top:50%;width:12px;height:12px;border-radius:50%;background:var(--green);border:3px solid var(--surface);translate:0 -50%;box-shadow:0 0 0 1px var(--green-100)}
+.tl b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl .amt{font-weight:700;white-space:nowrap}
+.tl .what{grid-column:1/-1;color:var(--muted);font-size:.82rem;line-height:1.55}
+.recent .foot{margin-top:16px}
+
+/* order status ring */
+.ring{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:center}
+@media (min-width:560px){.ring{grid-template-columns:auto minmax(0,1fr)}}
+.ring svg{width:190px;height:190px;justify-self:center}
+.ring svg circle{fill:none;stroke-width:30}
+.ring svg text{font:700 13px "IBM Plex Sans Arabic",sans-serif;text-anchor:middle;dominant-baseline:central}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.legend li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.legend li:first-child{border-top:0}
+.legend .sw{width:22px;height:8px;border-radius:4px}
+.legend .n{font-weight:700}
+
+
+/* chats: list + conversation; on the phone the conversation replaces the list */
+.chats{display:grid;gap:14px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1024px){.chats{grid-template-columns:minmax(300px,4fr) minmax(0,8fr);gap:22px}}
+.list{display:flex;flex-direction:column;gap:6px;max-height:calc(100dvh - 300px);min-height:300px;overflow:auto;margin:0 -8px;padding:0 8px}
+.item{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:start;border:1px solid transparent;background:transparent;border-radius:14px;padding:12px;cursor:pointer;transition:background .15s,border-color .15s}
+.item:hover{background:var(--canvas)}
+.item.on{background:var(--green-50);border-color:var(--green-100)}
+.item .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.item .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.item b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item time{color:var(--muted);font-size:.76rem;white-space:nowrap}
+.item .last{color:var(--muted);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .pill{align-self:flex-start;white-space:normal;border-radius:10px}
+.conv{display:flex;flex-direction:column;height:calc(100dvh - 220px);min-height:460px;padding:0;overflow:hidden}
+.conv-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.conv-head h2{flex:1;min-width:0;font-size:1.05rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#back{display:none}
+#msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:18px;background:var(--canvas)}
+.b{max-width:min(78%,520px);padding:10px 14px;border-radius:16px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.94rem;line-height:1.65}
+.b small{display:block;font-size:.72rem;margin-bottom:2px;opacity:.75}
+.b.student{background:var(--surface);border:1px solid var(--line);align-self:flex-start;border-start-start-radius:6px}
+.b.bot{background:var(--green-50);align-self:flex-end;border-start-end-radius:6px}
+.b.human{background:var(--green);color:#fff;align-self:flex-end;border-start-end-radius:6px}
+.b.failed{outline:1.5px dashed var(--red);outline-offset:-1.5px}
+.b .fail{color:var(--red);font-size:.76rem;font-weight:600;margin-top:4px}
+.b.human .fail{color:#ffd2c9}
+.b .ph{display:block;max-width:220px;border-radius:12px;margin:6px 0}
+#reply{display:flex;gap:10px;align-items:flex-end;padding:12px 14px;border-top:1px solid var(--line)}
+#text{flex:1;min-height:48px;max-height:160px;resize:none;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:1rem;background:var(--surface)}
+#text:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 4px var(--green-50)}
+#send{width:48px;min-height:48px;padding:0}
+@media (max-width:1023px){
+  .chats.reading .list-card{display:none}
+  .chats:not(.reading) .conv{display:none}
+  #back{display:inline-flex}
+  .conv{height:calc(100dvh - 250px - env(safe-area-inset-bottom));min-height:400px}
+}
+
+/* orders: rows of their own; one card per order on the phone */
+table,tbody{display:block;width:100%}
+thead{display:none}
+tr{display:grid;gap:4px 20px;padding:16px 4px;border-top:1px solid var(--line)}
+tbody tr:first-child{border-top:0;padding-top:4px}
+td{display:block;padding:0;font-size:.92rem;text-align:start;min-width:0}
+td[data-k]::before{content:attr(data-k);display:block;color:var(--muted);font-size:.76rem;line-height:1.5}
+td .sub{color:var(--muted);font-size:.8rem}
+td .name{font-weight:600}
+td .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+td .tags .pill{white-space:normal;border-radius:10px}
+td.prods{white-space:pre-line;line-height:1.7}
+td.total{font-weight:700;white-space:nowrap}
+td.acts{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
+.orders tr{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"who st" "ph ph" "wil wil" "prods prods" "total total" "acts acts"}
+.orders td.who{grid-area:who}.orders td.ph{grid-area:ph}.orders td.wil{grid-area:wil}.orders td.prods{grid-area:prods}.orders td.st{grid-area:st;justify-self:end}
+.orders td.total{grid-area:total;font-size:1.05rem}.orders td.acts{grid-area:acts;margin-top:8px}
+.orders td[data-k]::before{display:inline-block;min-width:76px}
+.orders td.wil .sub{display:inline;margin-inline-start:8px}
+@media (min-width:900px){
+  .orders tr{grid-template-columns:minmax(9rem,1.2fr) minmax(7rem,.8fr) minmax(9rem,1.5fr) 6.5rem 9rem minmax(8.5rem,auto);grid-template-areas:"who ph prods total st acts" "who wil prods total st acts"}
+  .orders td[data-k]::before{display:none}
+  .orders td.wil .sub{display:block;margin:0}
+  .orders td.st{justify-self:start}
+  .orders td.total{font-size:.95rem}
+  .orders td.acts{margin-top:0;justify-content:flex-end}
+}
+
+/* stock */
+.srow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:14px 0;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0;padding-top:0}
+.srow .who{display:flex;align-items:center;gap:12px;min-width:min(100%,16rem);flex:1}
+.srow b{font-weight:600}
+.srow .chips{display:flex;flex-wrap:wrap;gap:6px;flex-basis:100%}
+@media (min-width:900px){.srow .chips{flex-basis:auto;flex:2}}
+.toggle{border:0;cursor:pointer;font:inherit}
+.toggle.pill{min-height:38px;padding:0 16px;font-size:.84rem}
+.chip{min-height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:.86rem;cursor:pointer;transition:background .15s,border-color .15s}
+.chip:hover{border-color:#cfd5d1}
+.chip.out{background:var(--red-50);border-color:var(--red-50);color:var(--red);text-decoration:line-through}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1.5"/><rect width="7" height="5" x="14" y="3" rx="1.5"/><rect width="7" height="9" x="14" y="12" rx="1.5"/><rect width="7" height="5" x="3" y="16" rx="1.5"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
+  <symbol id="i-stock" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+</svg>
+
+<div id="login" hidden>
+  <form class="card">
+    <div class="lhead"><div class="mark"><svg class="i"><use href="#i-bag"/></svg></div><h1>لوحة المتجر</h1></div>
+    <p>طلبياتك ومحادثات زبائنك في مكان واحد.</p>
+    <label for="pw">كلمة السر</label>
+    <input id="pw" class="field num" type="password" autocomplete="current-password" required>
+    <p id="loginerr" class="err" role="alert" hidden></p>
+    <button class="btn pri" type="submit">دخول</button>
+  </form>
+</div>
+
+<div id="app" class="shell" hidden>
+  <aside class="side">
+    <div class="brand-row"><div class="mark"><svg class="i"><use href="#i-bag"/></svg></div><b class="shopname">متجرك</b></div>
+    <nav class="nav" aria-label="أقسام اللوحة">
+      <a href="#home"><svg class="i"><use href="#i-home"/></svg>الرئيسية</a>
+      <a href="#chats"><svg class="i"><use href="#i-chat"/></svg>المحادثات<span class="badge num" id="nb-chats" hidden></span></a>
+      <a href="#orders"><svg class="i"><use href="#i-bag"/></svg>الطلبيات<span class="badge num" id="nb-orders" hidden></span></a>
+      <a href="#stock"><svg class="i"><use href="#i-stock"/></svg>المخزون</a>
+    </nav>
+    <button class="btn ghost out logout" type="button"><svg class="i flip"><use href="#i-out"/></svg>خروج</button>
+  </aside>
+
+  <div class="main">
+    <header class="mhead">
+      <div class="brand-row"><div class="mark"><svg class="i"><use href="#i-bag"/></svg></div><b class="shopname">متجرك</b></div>
+      <button class="btn ghost icon logout" type="button" aria-label="خروج"><svg class="i flip"><use href="#i-out"/></svg></button>
+    </header>
+    <div class="top">
+      <div><h1 id="title">الرئيسية</h1><p class="date" id="today"></p></div>
+      <div class="seg" id="period" role="group" aria-label="الفترة"><button type="button" id="p-today">اليوم</button><button type="button" id="p-week" class="on">آخر 7 أيام</button></div>
+    </div>
+    <div id="banner" role="alert" hidden></div>
+
+    <main class="page">
+      <section id="home" class="home" data-title="الرئيسية">
+        <div class="kpis" id="kpis"></div>
+        <div class="card chart">
+          <div class="head"><h2>الطلبيات المؤكدة في آخر 7 أيام</h2><span class="aside" id="chart-total"></span></div>
+          <div class="plot"><div class="ticks num" id="ticks" aria-hidden="true"></div><div class="bars" id="bars" role="group"></div></div>
+        </div>
+        <div class="card recent">
+          <div class="head"><h2>آخر الطلبيات</h2></div>
+          <ol class="tl" id="recent"></ol>
+          <div class="foot"><a class="more" href="#orders">كل الطلبيات<svg class="i"><use href="#i-arrow"/></svg></a></div>
+        </div>
+        <div class="card status">
+          <div class="head"><h2>حالة الطلبيات</h2><span class="aside" id="status-when"></span></div>
+          <div class="ring"><svg viewBox="0 0 200 200" id="ring" role="img"></svg><ul class="legend" id="legend"></ul></div>
+        </div>
+      </section>
+
+      <section id="chats" class="chats" data-title="المحادثات" hidden>
+        <div class="card list-card">
+          <div class="head"><h2>تنتظر ردك<span class="cnt num" id="chat-n">0</span></h2></div>
+          <div class="list" id="list"></div>
+        </div>
+        <div class="card conv">
+          <div class="conv-head">
+            <button class="btn icon ghost" id="back" type="button" aria-label="رجوع إلى القائمة"><svg class="i"><use href="#i-back"/></svg></button>
+            <h2 id="chattitle">اختر محادثة</h2>
+            <button class="btn sm" id="release" type="button" hidden><svg class="i"><use href="#i-bot"/></svg>أرجعها للبوت</button>
+            <button class="btn icon ghost" id="forget" type="button" hidden title="احذف بيانات الزبون" aria-label="احذف بيانات الزبون"><svg class="i"><use href="#i-trash"/></svg></button>
+          </div>
+          <div id="msgs"><div class="empty" id="nochat"><div class="ic"><svg class="i"><use href="#i-chat"/></svg></div>اختر محادثة من القائمة لترى الرسائل وترد على الزبون.</div></div>
+          <div id="reply" hidden>
+            <textarea id="text" maxlength="1500" rows="1" placeholder="اكتب ردك هنا…" aria-label="ردك على الزبون"></textarea>
+            <button class="btn pri" id="send" type="button" aria-label="إرسال"><svg class="i flip"><use href="#i-send"/></svg></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="orders" class="card" data-title="الطلبيات" hidden>
+        <div class="head"><div class="seg" id="ofilter" role="group" aria-label="حالة الطلبيات"></div><a class="btn sm pri" href="/api/orders.csv"><svg class="i"><use href="#i-down"/></svg>ملف الطلبيات الجاهزة للشحن</a></div>
+        <table class="orders">
+          <thead><tr><th>الزبون</th><th>الهاتف</th><th>الولاية</th><th>المنتجات</th><th>المجموع</th><th>الحالة</th><th></th></tr></thead>
+          <tbody id="orderrows"></tbody>
+        </table>
+        <div class="empty" id="notab" hidden><div class="ic"><svg class="i"><use href="#i-check"/></svg></div>لا طلبيات في هذه الخانة.</div>
+        <div class="empty" id="noord" hidden><div class="ic"><svg class="i"><use href="#i-bag"/></svg></div>لا طلبيات في آخر 30 يوماً. حين يؤكد زبون طلبيته تظهر هنا.</div>
+      </section>
+
+
+      <section id="stock" class="card" data-title="المخزون" hidden>
+        <div class="head"><h2>المنتجات</h2></div>
+        <p class="hint">اضغط على منتج أو لون أو مقاس نفذ: البوت يقول للزبون إنه نفذ ولا يأخذ عليه طلباً. اضغط مرة أخرى حين يرجع.</p>
+        <div id="stockrows"></div>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+'use strict';
+const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const MONTHS_AR = ['جانفي', 'فيفري', 'مارس', 'أفريل', 'ماي', 'جوان', 'جويلية', 'أوت', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+// epoch ms -> Algeria local (UTC+1) text
+const when = (ms) => {
+  if (!ms) return '';
+  const d = new Date(ms + 3600000);
+  return DAYS_AR[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS_AR[d.getUTCMonth()] + '، ' + d.toISOString().slice(11, 16);
+};
+
+const $ = (id) => document.getElementById(id);
+const PAGES = ['home', 'chats', 'orders', 'stock'];
+const wide = () => matchMedia('(min-width:1024px)').matches;
+let current = null;   // phone of the open chat
+let busy = false;
+let period = 'week';  // the home numbers: today or the last 7 days
+let last = null;      // the last /api/state, to switch the period without a call
+let lastOrders = [];
+
+// keep = a notice the owner must act on (phone the customer): the 5-second refresh does not wipe it
+function showError(msg, keep) {
+  const b = $('banner');
+  b.textContent = msg || '';
+  b.hidden = !msg;
+  b.dataset.keep = msg && keep ? '1' : '';
+}
+
+async function api(path, body) {
+  const opt = body === undefined ? {} : { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) };
+  let r;
+  try { r = await fetch(path, opt); } catch { throw new Error('تعذّر الاتصال بالخادم.'); }
+  if (r.status === 401 && path !== '/api/login') { showLogin(); throw new Error(''); }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const m = { 429: 'محاولات كثيرة، انتظر ربع ساعة.', 401: 'كلمة السر خاطئة.', 502: 'فشل الإرسال إلى واتساب.', 413: 'الرسالة كبيرة.', 404: 'العنصر غير موجود.' }[r.status];
+    throw new Error(m || 'حدث خطأ، حاول مرة أخرى.');
+  }
+  return data;
+}
+
+function showLogin() { $('app').hidden = true; $('login').hidden = false; }
+
+// Arabic agreement for counting: 0 / 1 / 2 / 3-10 / 11+
+function count(n, one, two, few, many) {
+  return n === 1 ? one : n === 2 ? two : n + ' ' + (n >= 3 && n <= 10 ? few : many);
+}
+
+function ago(at) {
+  const m = Math.max(0, Math.floor((Date.now() - at) / 60000));
+  if (m < 1) return 'الآن';
+  if (m === 1) return 'قبل دقيقة';
+  if (m === 2) return 'قبل دقيقتين';
+  if (m < 11) return 'قبل ' + m + ' دقائق';
+  if (m < 60) return 'قبل ' + m + ' دقيقة';
+  const h = Math.floor(m / 60);
+  if (h === 1) return 'قبل ساعة';
+  if (h === 2) return 'قبل ساعتين';
+  if (h < 11) return 'قبل ' + h + ' ساعات';
+  if (h < 24) return 'قبل ' + h + ' ساعة';
+  const d = Math.floor(h / 24);
+  if (d === 1) return 'قبل يوم';
+  if (d === 2) return 'قبل يومين';
+  return 'قبل ' + d + (d < 11 ? ' أيام' : ' يوما');
+}
+const nb = (s) => s.replace(/ /g, ' '); // a time phrase never splits across lines
+
+const masked = (p) => (p.length > 6 ? p.slice(0, 3) + '****' + p.slice(-3) : '****');
+const channel = (p) => (p.startsWith('ig:') ? 'إنستغرام · ' : p.startsWith('fb:') ? 'ماسنجر · ' : '');
+const label = (x) => channel(x.phone) + (x.name || masked(x.phone.replace(/^(ig|fb):/, '')));
+const money = (n) => Number(n || 0).toLocaleString('en-US'); // 41,200: a space would split the number in right-to-left text
+const itemsText = (o, sep) => o.items.map((i) => i.name + (Object.keys(i.variant || {}).length ? ' ' + Object.values(i.variant).join(' ') : '') + ' × ' + i.qty).join(sep); // × and the quantity never part
+
+function el(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  if (props) for (const k in props) { if (k === 'class') e.className = props[k]; else if (k.startsWith('data-')) e.setAttribute(k, props[k]); else e[k] = props[k]; }
+  for (const k of kids) if (k != null) e.append(k);
+  return e;
+}
+const svgEl = (tag, attrs) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+const icon = (name, cls) => { const s = svgEl('svg', { class: 'i' + (cls ? ' ' + cls : '') }); s.append(svgEl('use', { href: '#i-' + name })); return s; };
+const pill = (kind, text, ic) => el('span', { class: 'pill ' + kind }, ic ? icon(ic) : null, text);
+// «طلبية واحدة» / «طلبيتان» / «5 طلبيات» / «14 طلبية», the number in bold
+const counted = (n, one, two, few, many, tag = 'strong') => (n === 1 ? [one] : n === 2 ? [two] : [el(tag, { class: 'num', textContent: String(n) }), ' ' + (n >= 3 && n <= 10 ? few : many)]);
+// a rebuild every 5 seconds must not throw keyboard focus back to the page start
+function rebuild(box, kids) {
+  const sel = 'a,button,[tabindex]';
+  const was = [...box.querySelectorAll(sel)].indexOf(document.activeElement);
+  box.replaceChildren(...kids);
+  if (was >= 0) box.querySelectorAll(sel)[was]?.focus({ preventScroll: true });
+}
+const empty = (ic, text) => el('div', { class: 'empty' }, el('div', { class: 'ic' }, icon(ic)), text);
+
+// one page at a time, from the address (#orders…): the phone's back button works
+function show() {
+  const page = PAGES.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home';
+  for (const id of PAGES) $(id).hidden = id !== page;
+  for (const a of document.querySelectorAll('.nav a')) {
+    const on = a.getAttribute('href') === '#' + page;
+    a.classList.toggle('on', on);
+    if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  }
+  $('title').textContent = $(page).dataset.title;
+  $('period').hidden = page !== 'home';
+  window.scrollTo(0, 0);
+}
+addEventListener('hashchange', show);
+
+// four cards; the green one is the thing to do now: chats first, then shipping
+function renderKpis(s) {
+  const n = s.numbers[period];
+  const chats = s.waiting.length;
+  const now = chats || !s.toShip ? 'chats' : 'ship';
+  const val = (v, unit) => el('div', { class: 'val num' }, v, unit ? el('small', { textContent: unit }) : null);
+  const card = (key, href, ic, lbl, v, ...sub) => el('a', { class: 'card kpi' + (key === now ? ' now' : ''), href },
+    el('div', { class: 'ic' }, icon(ic)), el('div', { class: 'lbl', textContent: lbl }), v, el('div', { class: 'sub' }, ...sub));
+  const oldest = chats ? s.waiting.reduce((a, b) => (a.at <= b.at ? a : b)) : null;
+  const chatCard = card('chats', '#chats', 'chat', 'محادثات تنتظر ردك', val(String(chats)),
+    oldest ? el('span', null, 'الأقدم ', el('b', { textContent: label(oldest) }), '، ' + ago(oldest.at)) : el('span', { textContent: 'البوت يرد على الزبائن' }));
+  if (oldest) chatCard.onclick = () => openChat(oldest.phone);
+  rebuild($('kpis'), [
+    chatCard,
+    card('ship', s.toShip ? '/api/orders.csv' : '#orders', 'truck', 'طلبيات تنتظر الشحن', val(String(s.toShip)),
+      ...(s.toShip ? [el('span', { class: 'go', textContent: 'حمّل ملف الشحن' }), icon('down')] : [el('span', { textContent: 'لا شيء ينتظر الشحن' })])),
+    card('', '#orders', 'check', 'طلبيات مؤكدة', val(String(n.confirmed)),
+      el('span', { textContent: 'من ' + count(n.conversations, 'محادثة واحدة', 'محادثتين', 'محادثات', 'محادثة') })),
+    card('', '#orders', 'wallet', 'المبلغ المستلم', val(money(n.amount), 'دج'),
+      el('span', { textContent: n.delivered ? count(n.delivered, 'طلبية واحدة استُلمت', 'طلبيتان استُلمتا', 'طلبيات استُلمت', 'طلبية استُلمت') : 'لا طلبية مستلمة بعد' })),
+  ]);
+}
+
+// bars: four even steps with room above the tallest; the count shows on today and on hover/focus
+function renderChart(days) {
+  const top = Math.max(4, Math.ceil((Math.max(0, ...days.map((d) => d.orders)) + 1) / 4) * 4);
+  $('ticks').replaceChildren(...[0, 1, 2, 3, 4].map((k) => { const t = el('span', { textContent: String(top - (top / 4) * k) }); t.style.top = k * 25 + '%'; return t; }));
+  const total = days.reduce((a, d) => a + d.orders, 0);
+  $('chart-total').replaceChildren(...(total ? counted(total, 'طلبية واحدة', 'طلبيتان', 'طلبيات', 'طلبية', 'b') : ['لا طلبيات بعد']));
+  const name = (d, i) => (i === days.length - 1 ? 'اليوم' : DAYS_AR[new Date(d.day + 'T12:00:00Z').getUTCDay()]);
+  $('bars').setAttribute('aria-label', 'الطلبيات المؤكدة في آخر 7 أيام');
+  // the same numbers twice in a row: leave the bars alone, so they do not grow again every 5 seconds
+  const key = JSON.stringify(days);
+  if ($('bars').dataset.key === key) return;
+  $('bars').dataset.key = key;
+  $('bars').replaceChildren(...days.map((d, i) => {
+    const said = d.orders ? count(d.orders, 'طلبية واحدة', 'طلبيتان', 'طلبيات', 'طلبية') : 'لا طلبيات';
+    const col = el('div', { class: 'col' }, el('em', { class: 'num', textContent: said, ariaHidden: 'true' }), el('i'));
+    col.style.setProperty('--h', (d.orders / top) * 100 + '%');
+    col.lastChild.style.animationDelay = i * 45 + 'ms';
+    return el('div', { class: 'bar' + (i === days.length - 1 ? ' today' : ''), tabIndex: 0, ariaLabel: name(d, i) + ': ' + said }, col, el('span', { textContent: name(d, i), ariaHidden: 'true' }));
+  }));
+}
+
+function renderRecent(orders) {
+  const rows = orders.slice().sort((a, b) => b.confirmed_at - a.confirmed_at).slice(0, 4);
+  $('recent').replaceChildren(...(rows.length ? rows.map((o) => el('li', null,
+    el('b', { textContent: o.name || '' }), el('span', { class: 'amt num', textContent: money(o.total) + ' دج' }),
+    el('span', { class: 'what', textContent: [itemsText(o, '، '), o.wilaya, nb(ago(o.confirmed_at))].filter(Boolean).join(' · ') })))
+    : [empty('bag', 'لا طلبيات بعد. حين يؤكد زبون طلبيته تظهر هنا.')]));
+  $('recent').classList.toggle('tl', rows.length > 0);
+}
+
+// the ring: one segment per status, the percent printed on the big ones
+const STATES = [['delivered', 'استُلمت', 'var(--green)'], ['shipped', 'في الطريق', 'var(--green-2)'], ['confirmed', 'تنتظر الشحن', 'var(--green-3)'], ['returned', 'أُرجعت', 'var(--ink-2)'], ['cancelled', 'أُلغيت', '#c9cfcb']];
+function renderStatus() {
+  const st = last.numbers[period].statuses;
+  const sum = STATES.reduce((a, [k]) => a + st[k], 0);
+  $('status-when').textContent = period === 'today' ? 'طلبيات اليوم' : 'طلبيات آخر 7 أيام';
+  const ring = $('ring');
+  const g = svgEl('g', { transform: 'rotate(-90 100 100)' });
+  const kids = [svgEl('circle', { cx: 100, cy: 100, r: 70, stroke: 'var(--track)' }), g];
+  const live = STATES.filter(([k]) => st[k] > 0);
+  const raw = live.map(([k]) => (st[k] / sum) * 100);
+  const pct = raw.map(Math.floor);
+  raw.map((r, i) => [r - pct[i], i]).sort((a, b) => b[0] - a[0]).slice(0, 100 - pct.reduce((a, b) => a + b, 0)).forEach(([, i]) => pct[i]++);
+  let start = 0;
+  for (const [j, [k, , color]] of live.entries()) {
+    const part = raw[j];
+    const len = Math.max(part - (live.length > 1 ? 1.2 : 0), .5);
+    g.append(svgEl('circle', { cx: 100, cy: 100, r: 70, stroke: color, pathLength: 100, 'stroke-dasharray': len + ' ' + (100 - len), 'stroke-dashoffset': -start }));
+    if (part >= 9 && live.length > 1) {
+      const a = ((start + part / 2) / 100) * 2 * Math.PI - Math.PI / 2;
+      const t = svgEl('text', { x: 100 + 70 * Math.cos(a), y: 100 + 70 * Math.sin(a), style: 'fill:' + (k === 'confirmed' ? 'var(--ink)' : '#fff') });
+      t.textContent = pct[j] + '%';
+      kids.push(t);
+    }
+    start += part;
+  }
+  const mid = svgEl('text', { x: 100, y: 92 });
+  const big = svgEl('tspan', { x: 100, style: 'font-size:30px;fill:var(--ink)' }); big.textContent = String(sum);
+  const small = svgEl('tspan', { x: 100, dy: 26, style: 'font-size:13px;font-weight:500;fill:var(--muted)' }); small.textContent = sum >= 3 && sum <= 10 ? 'طلبيات' : sum === 2 ? 'طلبيتان' : 'طلبية';
+  mid.append(big, small);
+  ring.replaceChildren(...kids, mid);
+  ring.setAttribute('aria-label', STATES.map(([k, t]) => t + ': ' + st[k]).join('، '));
+  $('legend').replaceChildren(...STATES.map(([k, t, color]) => {
+    const sw = el('span', { class: 'sw' }); sw.style.background = color;
+    return el('li', null, sw, el('span', { textContent: t }), el('span', { class: 'n num', textContent: String(st[k]) }));
+  }));
+}
+
+function renderList(waiting) {
+  const box = $('list');
+  $('chat-n').textContent = waiting.length;
+  if (!waiting.length) { box.replaceChildren(empty('bot', 'لا محادثات تنتظرك. البوت يرد على الزبائن، ويحوّل لك هنا من يحتاج إنساناً.')); return; }
+  // oldest first: that is the one to answer first
+  rebuild(box, waiting.slice().sort((a, b) => a.at - b.at).map((w) => {
+    const b = el('button', { class: 'item' + (w.phone === current ? ' on' : ''), type: 'button' },
+      el('div', { class: 'av' }, (w.name || '؟').trim().charAt(0) || '؟'),
+      el('div', { class: 'body' },
+        el('div', { class: 'row' }, el('b', { textContent: label(w) }), el('time', { textContent: ago(w.at) })),
+        w.reason ? pill('warn', w.reason) : null,
+        el('div', { class: 'last', textContent: w.last })));
+    b.onclick = () => openChat(w.phone);
+    return b;
+  }));
+}
+
+const STATUS = { confirmed: ['warn', 'تنتظر الشحن'], shipped: ['info', 'في الطريق'], delivered: ['ok', 'استُلمت'], cancelled: ['plain', 'أُلغيت'], returned: ['fail', 'أُرجعت'] };
+const MOVES = { confirmed: [['shipped', 'شُحنت', true], ['cancelled', 'أُلغيت']], shipped: [['delivered', 'استُلمت', true], ['returned', 'أُرجعت'], ['cancelled', 'أُلغيت']] };
+// the question before shipping: what the customer answered
+const RECHECK = { yes: ['ok', 'أكد الشحن', 'check'], asked: ['info', 'سألناه: نبعثوها؟', 'clock'], silent: ['warn', 'لم يرد على السؤال: اتصل به', 'phone'], failed: ['warn', 'السؤال لم يصله: اتصل به', 'phone'] };
+
+// tabs by what the owner does next; null = the first tab that has orders
+const GROUPS = [['wait', 'تنتظر الشحن', ['confirmed']], ['way', 'في الطريق', ['shipped']], ['done', 'انتهت', ['delivered', 'returned', 'cancelled']]];
+let ogroup = null;
+function renderOrders(rows) {
+  $('noord').hidden = rows.length > 0;
+  const of = (g) => rows.filter((o) => g[2].includes(o.status));
+  const tab = GROUPS.find((g) => g[0] === ogroup) ?? GROUPS.find((g) => of(g).length) ?? GROUPS[0];
+  if (rows.length) ogroup = tab[0]; // chosen on the first load; a new order must not switch the tab under the owner
+  rebuild($('ofilter'), GROUPS.map((g) => {
+    const b = el('button', { type: 'button', class: g === tab ? 'on' : '', ariaPressed: String(g === tab) }, g[1], el('span', { class: 'cnt num', textContent: String(of(g).length) }));
+    b.onclick = () => { ogroup = g[0]; renderOrders(lastOrders); };
+    return b;
+  }));
+  const shown = of(tab);
+  $('notab').hidden = !rows.length || shown.length > 0;
+  rebuild($('orderrows'), shown.map((o) => {
+    const acts = el('td', { class: 'acts' });
+    for (const [status, text, main] of MOVES[o.status] || []) {
+      const b = el('button', { class: 'btn sm' + (main ? ' pri' : ''), textContent: text, type: 'button' });
+      b.onclick = () => {
+        b.disabled = true;
+        api('/api/order', { id: o.id, status }).then((r) => showError(r?.notice || '', true)).catch((e) => { b.disabled = false; if (e.message) showError(e.message); }).then(refresh);
+      };
+      acts.append(b);
+    }
+    const tags = el('div', { class: 'tags' });
+    if (o.refused) tags.append(pill('fail', 'رفض ' + o.refused + ' طلبية من قبل', 'alert'));
+    const rc = RECHECK[o.recheck];
+    if (rc && o.status === 'confirmed') tags.append(pill(rc[0], rc[1], rc[2]));
+    const [sk, st] = STATUS[o.status] || ['plain', ''];
+    return el('tr', null,
+      el('td', { class: 'who' }, el('div', { class: 'name', textContent: o.name || '' }), el('div', { class: 'sub', textContent: when(o.confirmed_at) }), tags.childElementCount ? tags : null),
+      el('td', { class: 'ph num', 'data-k': 'الهاتف' }, el('bdi', { textContent: o.customer_phone || '' })),
+      el('td', { class: 'wil', 'data-k': 'الولاية' }, o.wilaya || '', el('div', { class: 'sub', textContent: o.delivery === 'office' ? 'إلى مكتب التوصيل' : 'إلى المنزل' })),
+      el('td', { class: 'prods', textContent: itemsText(o, '\n') }),
+      el('td', { class: 'total num', textContent: money(o.total) + ' دج' }),
+      el('td', { class: 'st' }, pill(sk, st)),
+      acts);
+  }));
+}
+
+// stock: one switch per product, one chip per colour / size value; a click switches it and saves the card
+function renderStock(products) {
+  rebuild($('stockrows'), products.length ? products.map((p) => {
+    const flip = (body) => api('/api/stock', body).then(() => showError('')).catch((e) => { if (e.message) showError(e.message); }).then(refresh);
+    const chips = el('div', { class: 'chips' });
+    for (const [key, vals] of Object.entries(p.variants)) {
+      for (const { v, out } of vals) chips.append(el('button', { class: 'chip' + (out ? ' out' : ''), type: 'button', textContent: v, title: key + (out ? ': نفذ' : ': متوفر'), onclick: () => flip({ id: p.id, key, value: v, out: !out }) }));
+    }
+    return el('div', { class: 'srow' },
+      el('div', { class: 'who' }, el('div', { class: 'av' }, p.name.trim().charAt(0)), el('b', { textContent: p.name }),
+        el('button', { class: 'toggle pill ' + (p.out ? 'fail' : 'ok'), type: 'button', textContent: p.out ? 'نفذ' : 'متوفر', title: 'اضغط للتبديل', onclick: () => flip({ id: p.id, out: !p.out }) })),
+      chips.childElementCount ? chips : null);
+  }) : [empty('stock', 'لا منتجات في البطاقة بعد.')]);
+}
+
+function badge(id, n) { const b = $(id); b.textContent = n; b.hidden = !n; }
+
+function renderHome() {
+  if (!last) return;
+  for (const [id, p] of [['p-today', 'today'], ['p-week', 'week']]) { $(id).classList.toggle('on', period === p); $(id).setAttribute('aria-pressed', String(period === p)); }
+  renderKpis(last);
+  renderStatus();
+}
+
+async function refresh() {
+  if (busy) return;
+  busy = true;
+  try {
+    const [s, o, st] = await Promise.all([api('/api/state'), api('/api/orders'), api('/api/stock')]);
+    $('login').hidden = true; $('app').hidden = false;
+    last = s; lastOrders = o.orders;
+    for (const b of document.querySelectorAll('.shopname')) b.textContent = s.shop || 'متجرك';
+    $('today').textContent = when(Date.now()).split('،')[0];
+    renderHome();
+    renderChart(s.days || []);
+    renderRecent(lastOrders);
+    renderList(s.waiting);
+    if (!current && s.waiting.length && wide()) openChat(s.waiting.reduce((a, b) => (a.at <= b.at ? a : b)).phone, true);
+    badge('nb-chats', s.waiting.length); badge('nb-orders', s.toShip);
+    renderOrders(lastOrders);
+    renderStock(st.products);
+    if (!$('banner').dataset.keep) showError('');
+  } catch (e) { if (e.message) showError(e.message); }
+  finally { busy = false; }
+}
+
+async function loadChat() {
+  if (!current) return;
+  try {
+    const c = await api('/api/chat?phone=' + encodeURIComponent(current));
+    $('chattitle').textContent = label(c.chat);
+    const box = $('msgs');
+    const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40;
+    const who = { student: 'الزبون', bot: 'البوت', human: 'أنت' };
+    const MEDIA = { '[voice]': 'رسالة صوتية', '[image]': 'صورة', '[other]': 'ملف', '[media]': 'ملف' };
+    box.replaceChildren(...c.messages.map((m) => {
+      const b = el('div', { class: 'b ' + m.role + (m.status === 'failed' ? ' failed' : '') },
+        el('small', { textContent: (who[m.role] || '') + ' · ' + ago(m.at) }), document.createTextNode(MEDIA[m.text] || m.text || ''));
+      if (m.media) b.insertBefore(el('img', { src: '/media/' + m.media, alt: 'صورة المنتج', class: 'ph' }), b.lastChild); // product photo the bot sent
+      if (m.status === 'failed') b.append(el('div', { class: 'fail', textContent: 'لم تصل هذه الرسالة' }));
+      return b;
+    }));
+    if (atBottom) box.scrollTop = box.scrollHeight;
+  } catch (e) { if (e.message) showError(e.message); }
+}
+
+function openChat(phone, quiet) {
+  current = phone;
+  $('chats').classList.add('reading');
+  if (!quiet && location.hash !== '#chats') location.hash = '#chats';
+  $('reply').hidden = false; $('release').hidden = false; $('forget').hidden = false;
+  $('msgs').replaceChildren();
+  loadChat().then(() => { const b = $('msgs'); b.scrollTop = b.scrollHeight; if (!quiet && wide()) $('text').focus(); });
+  if (!quiet) refresh();
+}
+
+async function sendReply() {
+  const text = $('text').value.trim();
+  if (!current || !text) return;
+  $('send').disabled = true;
+  try {
+    await api('/api/reply', { phone: current, text });
+    $('text').value = ''; grow(); showError('');
+    await loadChat(); refresh();
+  } catch (e) { if (e.message) showError(e.message); }
+  finally { $('send').disabled = false; }
+}
+
+const grow = () => { const t = $('text'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 160) + 'px'; };
+$('text').addEventListener('input', grow);
+$('send').onclick = sendReply;
+$('text').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && wide()) { e.preventDefault(); sendReply(); }
+});
+$('back').onclick = () => $('chats').classList.remove('reading');
+$('release').onclick = async () => {
+  if (!current) return;
+  try { await api('/api/release', { phone: current }); showError(''); await loadChat(); refresh(); }
+  catch (e) { if (e.message) showError(e.message); }
+};
+// the customer wrote «احذف بياناتي»: his messages go, his confirmed orders stay
+$('forget').onclick = async () => {
+  if (!current || !confirm('تحذف كل رسائل هذا الزبون؟ الطلبيات المؤكدة تبقى.')) return;
+  try { await api('/api/forget', { phone: current }); showError(''); await loadChat(); refresh(); }
+  catch (e) { if (e.message) showError(e.message); }
+};
+$('p-today').onclick = () => { period = 'today'; renderHome(); };
+$('p-week').onclick = () => { period = 'week'; renderHome(); };
+$('login').querySelector('form').onsubmit = async (e) => {
+  e.preventDefault();
+  try { await api('/api/login', { password: $('pw').value }); $('pw').value = ''; $('loginerr').hidden = true; showError(''); refresh(); }
+  catch (err) { $('loginerr').textContent = err.message || 'حدث خطأ، حاول مرة أخرى.'; $('loginerr').hidden = false; }
+};
+$('banner').onclick = () => showError('');
+for (const b of document.querySelectorAll('.logout')) b.onclick = async () => {
+  try { await api('/api/logout', {}); } catch {}
+  current = null;
+  $('chats').classList.remove('reading');
+  $('msgs').replaceChildren(); $('chattitle').textContent = 'اختر محادثة';
+  $('reply').hidden = true; $('release').hidden = true; $('forget').hidden = true;
+  showLogin();
+};
+
+show();
+refresh();
+setInterval(refresh, 5000);
+setInterval(loadChat, 5000);
+</script>
+</body>
+</html>
